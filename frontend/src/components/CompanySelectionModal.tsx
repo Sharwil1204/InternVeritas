@@ -42,7 +42,7 @@ export const CompanySelectionModal = ({
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/search-company?name=${companyName}`);
+        const res = await axios.get(`https://internveritas-production.up.railway.app/search-company?name=${companyName}`);
         if (res.data.companies && res.data.companies.length > 0) {
           setCompanies(res.data.companies.map((c: any, i: number) => ({
             id: String(i),

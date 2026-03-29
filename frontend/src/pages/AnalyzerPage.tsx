@@ -115,7 +115,7 @@ export const AnalyzerPage = () => {
             form.append("text", formData.advertisement);
           }
 
-          const res = await axios.post("http://localhost:5000/extract-company", form);
+          const res = await axios.post("https://internveritas-production.up.railway.app/extract-company", form);
           const detected = res.data.companyName;
 
           if (detected) {
@@ -242,7 +242,7 @@ export const AnalyzerPage = () => {
         form.append("linkedinObservations", formData.linkedinObservations);
       }
 
-      const res = await axios.post("http://localhost:5000/upload", form);
+      const res = await axios.post("https://internveritas-production.up.railway.app/upload", form);
 
       setIsLoading(false);
 
