@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Building2, Globe, CheckCircle, AlertCircle, Lightbulb } from 'lucide-react';
+import { Building2, Globe, CheckCircle, Lightbulb } from 'lucide-react';
 import axios from 'axios';
 
 interface CompanyOption {
@@ -24,13 +24,12 @@ interface CompanyVerificationData {
 interface CompanySelectionModalProps {
   companyName: string;
   onSelect: (verification: CompanyVerificationData) => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const CompanySelectionModal = ({
   companyName,
   onSelect,
-  onClose,
 }: CompanySelectionModalProps) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showNoneOfThese, setShowNoneOfThese] = useState(false);
