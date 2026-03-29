@@ -11,9 +11,15 @@ const Tesseract = require("tesseract.js");
 const Groq = require("groq-sdk");
 const axios = require("axios");
 const whois = require("whois");
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Initialize Supabase (Service Role Key for Backend)
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 app.use(cors());
 app.use(express.json());
@@ -415,6 +421,23 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       emailAnalysis: emailAnalysis,
       linkedinAnalysis: linkedinAnalysis
     });
+
+    // ✅ Log to Internal Database for future training
+    if (supabase) {
+      supabase.from('internal_scans').insert([{
+        company_name: companyName,
+        original_text: extractedText,
+        risk_score: finalScore,
+        risk_level: finalLevel,
+        explanation: aiResult.explanation,
+        factors: aiResult.factorBreakdown || {},
+        email_provided: email,
+        linkedin_observations: linkedinObservations
+      }]).then(({ error }) => {
+        if (error) console.error("Database Log Error:", error.message);
+        else console.log("Scan logged privately to database.");
+      });
+    }
 
   } catch (err) {
     console.log("ERROR:", err);
