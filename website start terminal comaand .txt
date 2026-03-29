@@ -1,6 +1,0 @@
-frontend terminal :- npm run dev
-+ icon click karke new terminal me :- cd C:\Users\Lenovo\Desktop\intern-project\backend                 
->> nodemon index.js
-
-
-localhost:5173
