@@ -1,4 +1,5 @@
-import { Shield, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { InternVeritasLogo } from './InternVeritasLogo';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router';
@@ -45,7 +46,7 @@ export const Navbar = ({ variant = 'default' }: NavbarProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <Shield className="h-6 w-6 text-violet-500" />
+            <InternVeritasLogo size={28} />
               <div className="flex flex-col">
                 <span className="text-white font-semibold">InternVeritas</span>
               </div>
@@ -62,7 +63,7 @@ export const Navbar = ({ variant = 'default' }: NavbarProps) => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <Shield className="h-6 w-6 text-violet-500" />
+            <InternVeritasLogo size={28} />
             <div className="flex flex-col">
               <span className="text-white font-semibold">InternVeritas</span>
               <span className="text-xs text-white/50">The Truth About Your Internship</span>

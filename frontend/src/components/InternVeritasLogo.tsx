@@ -1,0 +1,19 @@
+export const InternVeritasLogo = ({ size = 40 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M 10 8 Q 10 6 12 6 L 68 6 Q 70 6 70 8 L 70 52 Q 70 68 40 76 Q 10 68 10 52 Z"
+      fill="#6d28d9" fillOpacity="0.2" stroke="#6d28d9" strokeWidth="2"
+    />
+    <path
+      d="M 18 18 L 18 50 Q 18 62 40 70 Q 62 62 62 50 L 62 18 Z"
+      fill="#8b5cf6" fillOpacity="0.08"
+    />
+    <path
+      d="M 26 40 L 35 50 L 55 28"
+      stroke="#8b5cf6" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
+    />
+    <circle cx="60" cy="62" r="10" fill="#020818" stroke="#6d28d9" strokeWidth="2"/>
+    <circle cx="60" cy="62" r="5.5" fill="none" stroke="#8b5cf6" strokeWidth="1.8"/>
+    <line x1="64" y1="66" x2="69" y2="72" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
