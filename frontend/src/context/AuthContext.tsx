@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, _password: string): Promise<boolean> => {
     // Mock login - in real app would validate against backend
     const user = { email };
     setUser(user);
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  const signup = async (email: string, password: string): Promise<boolean> => {
+  const signup = async (email: string, _password: string): Promise<boolean> => {
     // Mock signup - in real app would create user in backend
     const user = { email };
     setUser(user);
