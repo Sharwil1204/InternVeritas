@@ -7,7 +7,7 @@ const pdfParseFunc = pdfParse.default || pdfParse;
 const fs = require('fs');
 const path = require("path");
 const Tesseract = require("tesseract.js");
-const pdfPoppler = require("pdf-poppler");
+// const pdfPoppler = require("pdf-poppler"); // Disabled as it crashes on Linux
 const Groq = require("groq-sdk");
 const axios = require("axios");
 const whois = require("whois");
@@ -73,27 +73,8 @@ app.post("/extract-company", upload.single("file"), async (req, res) => {
 });
 
 async function extractTextFromScannedPDF(filePath) {
-  const outputDir = path.dirname(filePath);
-  const outputPrefix = path.basename(filePath, ".pdf");
-  const opts = {
-    format: "png",
-    out_dir: outputDir,
-    out_prefix: outputPrefix,
-    page: null
-  };
-  await pdfPoppler.convert(filePath, opts);
-  const files = fs.readdirSync(outputDir);
-  const pageImages = files
-    .filter(f => f.startsWith(outputPrefix) && f.endsWith(".png"))
-    .sort();
-  let fullText = "";
-  for (const imageFile of pageImages) {
-    const imagePath = path.join(outputDir, imageFile);
-    const result = await Tesseract.recognize(imagePath, "eng");
-    fullText += result.data.text + "\n";
-    fs.unlinkSync(imagePath);
-  }
-  return fullText;
+  console.log("ocr for scanned PDFs disabled temporarily due to linux deployment constraints.");
+  return "SCANNED_PDF_SUPPORT_CURRENTLY_LOCKED";
 }
 
 function analyzeScam(text) {
