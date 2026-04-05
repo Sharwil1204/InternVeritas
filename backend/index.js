@@ -176,6 +176,25 @@ function getFinalLevel(score) {
   return "VERY HIGH";
 }
 
+async function translateToEnglish(text) {
+  try {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{
+        role: "system",
+        content: "If the text is in Hindi, Hinglish, or Marathi, translate it to English. If it is already in English, return it exactly as is. Return ONLY the translated English text."
+      }, {
+        role: "user",
+        content: text.slice(0, 2500)
+      }],
+      temperature: 0.1
+    });
+    return response.choices[0].message.content.trim();
+  } catch (e) {
+    return text;
+  }
+}
+
 async function extractCompanyNameFromText(text) {
   try {
     const response = await groq.chat.completions.create({
@@ -418,9 +437,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
     fs.unlinkSync(filePath);
 
-    const ruleResult = analyzeScam(extractedText);
-    const aiResult = await analyzeWithGroq(extractedText, ruleResult);
-    const companyName = await extractCompanyNameFromText(extractedText);
+    // 🌐 Translate text to catch regional scams
+    const translatedText = await translateToEnglish(extractedText);
+
+    const ruleResult = analyzeScam(translatedText);
+    const aiResult = await analyzeWithGroq(translatedText, ruleResult);
+    const companyName = await extractCompanyNameFromText(translatedText);
 
     // ✅ Additional Analysis
     const emailAnalysis = analyzeEmail(email, companyName);
