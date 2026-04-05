@@ -174,7 +174,7 @@ export const AnalyzerPage = () => {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.advertisement.trim() !== '';
+        return formData.advertisement.trim() !== '' || formData.advertisementFile !== null;
       case 2:
         return true; // Email is optional
       case 3:

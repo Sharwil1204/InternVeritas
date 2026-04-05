@@ -7,6 +7,7 @@ const pdfParseFunc = pdfParse.default || pdfParse;
 const fs = require('fs');
 const path = require("path");
 const Tesseract = require("tesseract.js");
+const officeParser = require('officeparser');
 // const pdfPoppler = require("pdf-poppler"); // Disabled as it crashes on Linux
 const Groq = require("groq-sdk");
 const axios = require("axios");
@@ -48,6 +49,16 @@ app.post("/extract-company", upload.single("file"), async (req, res) => {
       } else if (req.file.mimetype.startsWith("image/")) {
         const result = await Tesseract.recognize(req.file.path, "eng");
         text = result.data.text;
+      } else if (req.file.originalname && (req.file.originalname.endsWith('.ppt') || req.file.originalname.endsWith('.pptx'))) {
+        try {
+          const newPath = req.file.path + path.extname(req.file.originalname);
+          fs.renameSync(req.file.path, newPath);
+          req.file.path = newPath; // update so unlink works
+          text = await officeParser.parseOfficeAsync(req.file.path);
+        } catch (err) {
+          console.error("PPT Extraction Error:", err);
+          text = "";
+        }
       } else {
         text = fs.readFileSync(req.file.path, "utf8");
       }
@@ -372,7 +383,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("No file uploaded");
 
-    const filePath = req.file.path;
+    let filePath = req.file.path;
     const mimeType = req.file.mimetype;
     const email = req.body.email || "";
     const linkedinObservations = req.body.linkedinObservations || "";
@@ -389,6 +400,16 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     } else if (mimeType.startsWith("image/")) {
       const result = await Tesseract.recognize(filePath, "eng");
       extractedText = result.data.text;
+    } else if (req.file.originalname && (req.file.originalname.endsWith('.ppt') || req.file.originalname.endsWith('.pptx'))) {
+      try {
+        const newPath = filePath + path.extname(req.file.originalname);
+        fs.renameSync(filePath, newPath);
+        filePath = newPath; // update so unlink works
+        extractedText = await officeParser.parseOfficeAsync(filePath);
+      } catch (err) {
+        console.error("PPT Extraction Error:", err);
+        extractedText = "";
+      }
     } else if (mimeType === "text/plain") {
       extractedText = fs.readFileSync(filePath, "utf-8");
     } else {
