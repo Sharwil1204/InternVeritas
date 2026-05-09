@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const AuthModal = () => {
-  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, login, signup } = useAuth();
+  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, login, signup, scanLimitMessage, setScanLimitMessage } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,6 +87,7 @@ export const AuthModal = () => {
 
   const handleClose = () => {
     setIsAuthModalOpen(false);
+    setScanLimitMessage(''); // Clear limit message on close
     resetForm();
   };
 
@@ -139,6 +140,22 @@ export const AuthModal = () => {
               </motion.div>
             ) : (
               <>
+                {/* Scan Limit Message */}
+                {scanLimitMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 rounded-xl border border-violet-500/30 bg-violet-600/10 flex items-start gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                      <Lock className="h-4 w-4 text-violet-400" />
+                    </div>
+                    <p className="text-violet-200 text-sm leading-relaxed font-medium">
+                      {scanLimitMessage}
+                    </p>
+                  </motion.div>
+                )}
+
                 {/* Title */}
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-white">

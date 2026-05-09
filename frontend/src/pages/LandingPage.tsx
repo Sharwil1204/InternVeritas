@@ -129,6 +129,7 @@ export const LandingPage = () => {
                 Analyze Now
                 <ArrowRight className="h-5 w-5" />
               </button>
+              <p className="text-white/50 text-sm mt-4">✨ 2 free scans — no account required</p>
               <div className="flex flex-wrap gap-4 mt-8">
                 {[
                   { icon: Brain, text: 'AI-Powered Analysis' },

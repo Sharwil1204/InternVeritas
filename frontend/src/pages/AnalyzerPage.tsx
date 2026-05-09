@@ -15,6 +15,7 @@ import { Footer } from '../components/Footer';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { CompanySelectionModal } from '../components/CompanySelectionModal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '../context/AuthContext';
 import axios from "axios";
 
 interface CompanyVerificationData {
@@ -47,6 +48,7 @@ interface FormData {
 
 export const AnalyzerPage = () => {
   const navigate = useNavigate();
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [showMismatchModal, setShowMismatchModal] = useState(false);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
@@ -225,6 +227,17 @@ export const AnalyzerPage = () => {
 
   const handleAnalyze = async () => {
     try {
+      // Guest scan limit check
+      if (!user) {
+        const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+        if (scanCount >= 2) {
+          setScanLimitMessage("You've used your 2 free scans! Create a free account to continue analyzing internship offers without limits.");
+          setAuthMode('signup');
+          setIsAuthModalOpen(true);
+          return;
+        }
+      }
+
       setIsLoading(true);
 
       const form = new FormData();
@@ -248,6 +261,12 @@ export const AnalyzerPage = () => {
       const res = await axios.post(`${apiUrl}/upload`, form);
 
       setIsLoading(false);
+
+      // Increment scan count for guests
+      if (!user) {
+        const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+        localStorage.setItem('internveritas_scan_count', (scanCount + 1).toString());
+      }
 
       navigate("/results", {
         state: {

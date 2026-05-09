@@ -14,6 +14,8 @@ interface AuthContextType {
   setIsAuthModalOpen: (open: boolean) => void;
   authMode: 'login' | 'signup';
   setAuthMode: (mode: 'login' | 'signup') => void;
+  scanLimitMessage: string;
+  setScanLimitMessage: (message: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [scanLimitMessage, setScanLimitMessage] = useState('');
 
   useEffect(() => {
     // Check localStorage for existing user
@@ -38,6 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const user = { email, fullName };
     setUser(user);
     localStorage.setItem('internveritas_user', JSON.stringify(user));
+    
+    // Reset scan count on login
+    localStorage.removeItem('internveritas_scan_count');
     return true;
   };
 
@@ -49,6 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedAccounts = JSON.parse(localStorage.getItem('internveritas_accounts') || '{}');
     storedAccounts[email] = fullName;
     localStorage.setItem('internveritas_accounts', JSON.stringify(storedAccounts));
+    
+    // Reset scan count on signup
+    localStorage.removeItem('internveritas_scan_count');
     return true;
   };
 
@@ -68,6 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthModalOpen,
         authMode,
         setAuthMode,
+        scanLimitMessage,
+        setScanLimitMessage,
       }}
     >
       {children}

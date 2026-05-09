@@ -125,12 +125,15 @@ export const Navbar = ({ variant = 'default' }: NavbarProps) => {
                 >
                   Login
                 </button>
-                <button
-                  onClick={handleSignup}
-                  className="px-4 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
-                >
-                  Sign Up
-                </button>
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={handleSignup}
+                    className="px-4 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                  <span className="text-[10px] text-violet-400 font-medium tracking-tight">2 free scans</span>
+                </div>
               </>
             )}
           </div>
