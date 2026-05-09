@@ -6,9 +6,11 @@ import { Navbar } from '../components/Navbar';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface Analysis {
   id: string;
+  user_email: string;
   companyName: string;
   date: string;
   riskScore?: number;
@@ -17,6 +19,7 @@ interface Analysis {
   paymentRequired: string;
   linkedinUrl: string;
   interviewProcess: string;
+  backend_result?: any;
 }
 
 export const HistoryPage = () => {
@@ -32,12 +35,60 @@ export const HistoryPage = () => {
       return;
     }
 
-    // Load analyses from localStorage
-    const stored = localStorage.getItem('internveritas_analyses');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setAnalyses(parsed);
-    }
+    const loadData = async () => {
+      // 1. Check for local analyses to sync
+      const stored = localStorage.getItem('internveritas_analyses');
+      if (stored) {
+        const localAnalyses = JSON.parse(stored);
+        if (localAnalyses.length > 0) {
+          console.log('Syncing local analyses to Supabase...');
+          const toSync = localAnalyses.map((a: any) => ({
+            user_email: user.email,
+            company_name: a.companyName,
+            risk_score: a.riskScore,
+            advertisement: a.advertisement,
+            email: a.email,
+            payment_required: a.paymentRequired,
+            linkedin_url: a.linkedinUrl,
+            interview_process: a.interviewProcess,
+            created_at: a.date
+          }));
+
+          const { error } = await supabase.from('scans').insert(toSync);
+          if (!error) {
+            localStorage.removeItem('internveritas_analyses');
+          } else {
+            console.error('Sync failed:', error);
+          }
+        }
+      }
+
+      // 2. Fetch from Supabase
+      const { data, error } = await supabase
+        .from('scans')
+        .select('*')
+        .eq('user_email', user.email)
+        .order('created_at', { ascending: false });
+
+      if (data && !error) {
+        const mapped = data.map(s => ({
+          id: s.id,
+          user_email: s.user_email,
+          companyName: s.company_name,
+          date: s.created_at,
+          riskScore: s.risk_score,
+          advertisement: s.advertisement,
+          email: s.email,
+          paymentRequired: s.payment_required,
+          linkedinUrl: s.linkedin_url,
+          interviewProcess: s.interview_process,
+          backend_result: s.backend_result
+        }));
+        setAnalyses(mapped);
+      }
+    };
+
+    loadData();
   }, [user, navigate, setIsAuthModalOpen, setAuthMode]);
 
   const calculateRiskScore = (analysis: Analysis) => {
@@ -105,7 +156,12 @@ export const HistoryPage = () => {
   };
 
   const handleViewReport = (analysis: Analysis) => {
-    navigate('/results', { state: { formData: analysis } });
+    navigate('/results', { 
+      state: { 
+        formData: analysis,
+        backendResult: analysis.backend_result
+      } 
+    });
   };
 
   if (!user) return null;

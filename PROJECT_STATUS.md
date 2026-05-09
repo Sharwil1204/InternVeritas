@@ -28,8 +28,8 @@ We have successfully transitioned InternVeritas into a **Freemium Platform** and
 - [x] **Robust Guest Detection**: Finalize the `!user || !user.email` check to ensure logged-in users never get blocked.
 
 ### 3. Backend & Data Persistence
-- [ ] **Supabase Scan History**: Sync the local scan history to Supabase for logged-in users so they can see their previous reports.
-- [ ] **Persistent Counter**: Move the guest scan counter to a more secure server-side or encrypted client-side storage to prevent easy resets.
+- [x] **Supabase Scan History**: Sync the local scan history to Supabase for logged-in users so they can see their previous reports.
+- [/] **Persistent Counter**: Move the guest scan counter to a more secure server-side or encrypted client-side storage to prevent easy resets.
 
 ### 4. Advanced AI Analysis
 - [ ] **Enhanced Extraction**: Improve company name extraction from complex PPT and Image files.

@@ -17,6 +17,7 @@ import { CompanySelectionModal } from '../components/CompanySelectionModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import axios from "axios";
+import { supabase } from '../lib/supabase';
 
 interface CompanyVerificationData {
   companyName: string;
@@ -57,6 +58,19 @@ export const AnalyzerPage = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Check scan limit for guests on mount
+    if (!user || !user.email) {
+      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+      if (scanCount >= 2) {
+        setScanLimitMessage("You've used your 2 free scans! Create an account to continue analyzing internship offers.");
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+        navigate('/');
+      }
+    }
+  }, [user, navigate, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
 
   const [formData, setFormData] = useState<AnalysisFormData>({
     companyName: '',
@@ -263,11 +277,52 @@ export const AnalyzerPage = () => {
 
       setIsLoading(false);
 
-      // Increment scan count for guests
+      // Handle storage and limits
       if (!user || !user.email) {
+        // 1. Increment scan count for limits
         const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
         localStorage.setItem('internveritas_scan_count', (scanCount + 1).toString());
-        console.log('Incremented scan count to:', scanCount + 1);
+        
+        // 2. Save analysis to local history for future sync
+        const localAnalyses = JSON.parse(localStorage.getItem('internveritas_analyses') || '[]');
+        localAnalyses.push({
+          id: Date.now().toString(),
+          companyName: res.data.companyName || formData.companyName,
+          date: new Date().toISOString(),
+          riskScore: res.data.finalRiskScore,
+          advertisement: formData.advertisement,
+          email: formData.email,
+          paymentRequired: formData.paymentRequired,
+          linkedinUrl: formData.linkedinUrl,
+          interviewProcess: formData.interviewProcess,
+          backend_result: res.data
+        });
+        // Keep only last 5 for guests to save space
+        localStorage.setItem('internveritas_analyses', JSON.stringify(localAnalyses.slice(-5)));
+        
+        console.log('Saved to local history (guest)');
+      }
+
+      // Save scan to Supabase for logged-in users
+      if (user && user.email) {
+        try {
+          await supabase.from('scans').insert([
+            {
+              user_email: user.email,
+              company_name: res.data.companyName || formData.companyName,
+              risk_score: res.data.finalRiskScore,
+              advertisement: formData.advertisement,
+              email: formData.email,
+              payment_required: formData.paymentRequired,
+              linkedin_url: formData.linkedinUrl,
+              interview_process: formData.interviewProcess,
+              backend_result: res.data
+            }
+          ]);
+          console.log('Scan saved to Supabase');
+        } catch (dbErr) {
+          console.error('Failed to save scan to Supabase:', dbErr);
+        }
       }
 
       navigate("/results", {

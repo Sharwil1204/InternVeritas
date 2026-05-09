@@ -17,6 +17,7 @@ import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface RiskFactor {
   name: string;
@@ -29,8 +30,25 @@ export const ResultsPage = () => {
   const navigate = useNavigate();
   const formData = location.state?.formData;
   const backendResult = location.state?.backendResult;
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
   const [riskScore, setRiskScore] = useState(0);
   const [feedback, setFeedback] = useState('');
+
+  const handleScanAgain = () => {
+    // Check scan limit for guests
+    if (!user || !user.email) {
+      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+      if (scanCount >= 2) {
+        setScanLimitMessage("You've used your 2 free scans! Create an account to continue analyzing internship offers.");
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+        return;
+      }
+    }
+    navigate('/'); // Go back to home to start again or directly to /analyze?
+    // User usually starts from home or we can go directly to /analyze
+    // navigate('/analyze'); 
+  };
 
   useEffect(() => {
     if (!formData) {
@@ -762,9 +780,7 @@ export const ResultsPage = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <button
-              onClick={() => {
-                navigate('/');
-              }}
+              onClick={handleScanAgain}
               className="w-full sm:w-auto px-8 py-3 bg-white/5 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-colors"
             >
               Scan Again
