@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router';
 import { Navbar } from '../components/Navbar';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Footer } from '../components/Footer';
+import { Shield } from 'lucide-react';
 
 export const PrivacyPolicyPage = () => {
   const navigate = useNavigate();
