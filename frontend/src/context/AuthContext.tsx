@@ -2,12 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   email: string;
+  fullName: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, fullName: string) => Promise<boolean>;
   logout: () => void;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
@@ -31,18 +32,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, _password: string): Promise<boolean> => {
-    // Mock login - in real app would validate against backend
-    const user = { email };
+    // Check if this user signed up before (has stored name)
+    const storedAccounts = JSON.parse(localStorage.getItem('internveritas_accounts') || '{}');
+    const fullName = storedAccounts[email] || email.split('@')[0];
+    const user = { email, fullName };
     setUser(user);
     localStorage.setItem('internveritas_user', JSON.stringify(user));
     return true;
   };
 
-  const signup = async (email: string, _password: string): Promise<boolean> => {
-    // Mock signup - in real app would create user in backend
-    const user = { email };
+  const signup = async (email: string, _password: string, fullName: string): Promise<boolean> => {
+    const user = { email, fullName };
     setUser(user);
     localStorage.setItem('internveritas_user', JSON.stringify(user));
+    // Store the name so login can retrieve it later
+    const storedAccounts = JSON.parse(localStorage.getItem('internveritas_accounts') || '{}');
+    storedAccounts[email] = fullName;
+    localStorage.setItem('internveritas_accounts', JSON.stringify(storedAccounts));
     return true;
   };
 

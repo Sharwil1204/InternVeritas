@@ -104,10 +104,15 @@ export const Navbar = ({ variant = 'default' }: NavbarProps) => {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-white/70 text-sm">{user.email}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-violet-300 text-sm font-semibold">
+                    {(user.fullName || user.email)[0].toUpperCase()}
+                  </div>
+                  <span className="text-white/80 text-sm font-medium">{user.fullName || user.email.split('@')[0]}</span>
+                </div>
                 <button
                   onClick={logout}
-                  className="px-4 py-1.5 text-sm border border-white/20 text-white rounded-lg hover:bg-white/5 transition-colors"
+                  className="px-4 py-1.5 text-sm border border-white/20 text-white/70 rounded-lg hover:bg-white/5 hover:text-white transition-colors"
                 >
                   Logout
                 </button>
@@ -175,7 +180,12 @@ export const Navbar = ({ variant = 'default' }: NavbarProps) => {
               <div className="flex flex-col gap-2 pt-2">
                 {user ? (
                   <>
-                    <span className="text-white/70 text-sm">{user.email}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-violet-300 text-xs font-semibold">
+                        {(user.fullName || user.email)[0].toUpperCase()}
+                      </div>
+                      <span className="text-white/80 text-sm">{user.fullName || user.email.split('@')[0]}</span>
+                    </div>
                     <button
                       onClick={() => {
                         logout();
