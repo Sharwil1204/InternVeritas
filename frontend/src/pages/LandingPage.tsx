@@ -323,6 +323,7 @@ export const LandingPage = () => {
         </FadeInSection>
 
         <Footer />
+      </div>
     </div>
   );
 };
