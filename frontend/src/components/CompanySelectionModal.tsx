@@ -197,13 +197,13 @@ export const CompanySelectionModal = ({
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="text-white font-medium mb-1">{company.name}</h4>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white font-medium mb-1 truncate">{company.name}</h4>
                         <div className="flex items-center gap-2 text-violet-400 text-sm mb-2 max-w-full overflow-hidden pr-4">
                           <Globe className="h-3 w-3 flex-shrink-0" />
-                          <span className="truncate">{company.website}</span>
+                          <span className="truncate break-all">{company.website}</span>
                         </div>
-                        <p className="text-white/60 text-sm">{company.description}</p>
+                        <p className="text-white/60 text-sm line-clamp-3 break-words">{company.description}</p>
                       </div>
                       {selectedId === company.id && (
                         <CheckCircle className="h-5 w-5 text-violet-400 flex-shrink-0" />
