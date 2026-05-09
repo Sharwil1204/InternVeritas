@@ -18,7 +18,7 @@ export const TermsConditionsPage = () => {
               Terms & Conditions
             </h1>
           </div>
-          <p className="text-white/40 text-sm mb-8">Last updated: May 9, 2026</p>
+          
           
           <div className="space-y-6 text-white/70 text-sm leading-relaxed" style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(20px)', padding: '2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
             
