@@ -102,12 +102,20 @@ app.get("/search-company", async (req, res) => {
     if (serperKey) {
       const serperRes = await axios.post(
         "https://google.serper.dev/search",
-        { q: `${companyName} official website`, num: 3 },
+        { q: `${companyName} official website`, num: 10 },
         { headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" } }
       );
       
       if (serperRes.data.organic && serperRes.data.organic.length > 0) {
-        const topResults = serperRes.data.organic.slice(0, 3);
+        // Filter out social media and job portals to show "proper" official websites
+        const excludedDomains = ['linkedin.com', 'glassdoor.', 'ambitionbox.com', 'wikipedia.org', 'facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'quora.com', 'indeed.com', 'naukri.com'];
+        
+        const filteredResults = serperRes.data.organic.filter(res => {
+          return !excludedDomains.some(domain => res.link.toLowerCase().includes(domain));
+        });
+
+        // Take top 5 clean results
+        const topResults = filteredResults.slice(0, 5);
         const companiesList = [];
 
         await Promise.all(topResults.map(async (result) => {
