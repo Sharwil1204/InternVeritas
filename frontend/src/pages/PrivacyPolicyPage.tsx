@@ -58,7 +58,7 @@ export const PrivacyPolicyPage = () => {
 
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">6. Contact Us</h2>
-              <p>If you have any questions or concerns about this Privacy Policy, please contact us at support@internveritas.com or via our official channels.</p>
+              <p>If you have any questions or concerns about this Privacy Policy, please contact us at internveritas.official@gmail.com or via our official channels.</p>
             </section>
           </div>
         </div>
