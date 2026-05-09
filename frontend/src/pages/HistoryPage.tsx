@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Clock, Building2, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Navbar } from '../components/Navbar';
