@@ -17,6 +17,7 @@ import { motion, useInView } from 'motion/react';
 import { Navbar } from '../components/Navbar';
 import { AuthModal } from '../components/AuthModal';
 import { ParticlesBackground } from '../components/ParticlesBackground';
+import { Footer } from '../components/Footer';
 
 const TypewriterText = ({ texts }: { texts: string[] }) => {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -321,22 +322,7 @@ export const LandingPage = () => {
           </section>
         </FadeInSection>
 
-        {/* Footer */}
-        <footer className="py-8 border-t border-white/10 mt-12 bg-[#020818]/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-violet-500" />
-                <span className="text-white/70 text-sm">© 2026 InternVeritas. All rights reserved.</span>
-              </div>
-              <div className="flex items-center gap-6 text-sm">
-                <span onClick={() => navigate('/privacy')} className="text-white/50 hover:text-violet-400 transition-colors cursor-pointer">Privacy Policy</span>
-                <span onClick={() => navigate('/terms')} className="text-white/50 hover:text-violet-400 transition-colors cursor-pointer">Terms & Conditions</span>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
+        <Footer />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Clock, Building2, AlertTriangle, CheckCircle, FileText } from 'lucide-r
 import { motion } from 'motion/react';
 import { Navbar } from '../components/Navbar';
 import { ParticlesBackground } from '../components/ParticlesBackground';
+import { Footer } from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 
 interface Analysis {
@@ -251,6 +252,7 @@ export const HistoryPage = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

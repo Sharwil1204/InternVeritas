@@ -12,6 +12,7 @@ import {
 import { motion } from 'motion/react';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 import { supabase } from '../lib/supabase';
 
 interface RiskFactor {
@@ -653,6 +654,7 @@ export const ResultsPage = () => {
           </motion.div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

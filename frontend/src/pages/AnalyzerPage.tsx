@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { CompanySelectionModal } from '../components/CompanySelectionModal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -806,6 +807,7 @@ export const AnalyzerPage = () => {
           />
         )}
       </div>
+      <Footer />
     </div>
   );
 };
