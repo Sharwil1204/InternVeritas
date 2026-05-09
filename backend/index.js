@@ -131,32 +131,54 @@ app.get("/search-company", async (req, res) => {
 
           let domainAge = "Unknown";
           try {
-            // First try RDAP (JSON WHOIS) which is faster and more reliable
-            const rdapRes = await axios.get(`https://rdap.org/domain/${domain}`, { timeout: 3000 });
             let creationDateStr = null;
-            if (rdapRes.data && rdapRes.data.events) {
-              const regEvent = rdapRes.data.events.find(e => e.eventAction === 'registration');
-              if (regEvent && regEvent.eventDate) {
-                creationDateStr = regEvent.eventDate;
+
+            // 1. Try RDAP (JSON WHOIS) which is faster and more reliable
+            try {
+              const rdapRes = await axios.get(`https://rdap.org/domain/${domain}`, { timeout: 3000 });
+              if (rdapRes.data && rdapRes.data.events) {
+                const regEvent = rdapRes.data.events.find(e => e.eventAction === 'registration');
+                if (regEvent && regEvent.eventDate) {
+                  creationDateStr = regEvent.eventDate;
+                }
+              }
+            } catch (err) {
+              console.log("RDAP failed for", domain);
+            }
+
+            // 2. Fallback to HTML Scrape of who.is
+            if (!creationDateStr) {
+              try {
+                const whoIsRes = await axios.get(`https://who.is/whois/${domain}`, { timeout: 3000 });
+                const match = whoIsRes.data.match(/(?:Registered On|Creation Date).*?(\d{4}-\d{2}-\d{2})/i);
+                if (match && match[1]) {
+                  creationDateStr = match[1];
+                }
+              } catch (err) {
+                console.log("who.is scrape failed for", domain);
               }
             }
 
-            // Fallback to raw WHOIS if RDAP fails
+            // 3. Fallback to raw WHOIS if others fail
             if (!creationDateStr) {
-              const whoisData = await new Promise((resolve, reject) => {
-                whois.lookup(domain, (err, data) => {
-                  if (err) reject(err);
-                  else resolve(data);
+              try {
+                const whoisData = await new Promise((resolve, reject) => {
+                  whois.lookup(domain, (err, data) => {
+                    if (err) reject(err);
+                    else resolve(data);
+                  });
                 });
-              });
 
-              if (whoisData) {
-                const creationDateMatch = whoisData.match(/Creation Date:\s*(.+)/i) || 
-                                          whoisData.match(/Created on:\s*(.+)/i) ||
-                                          whoisData.match(/Registered on:\s*(.+)/i);
-                if (creationDateMatch && creationDateMatch[1]) {
-                  creationDateStr = creationDateMatch[1].trim();
+                if (whoisData) {
+                  const creationDateMatch = whoisData.match(/Creation Date:\s*(.+)/i) || 
+                                            whoisData.match(/Created on:\s*(.+)/i) ||
+                                            whoisData.match(/Registered on:\s*(.+)/i);
+                  if (creationDateMatch && creationDateMatch[1]) {
+                    creationDateStr = creationDateMatch[1].trim();
+                  }
                 }
+              } catch (err) {
+                console.log("Raw WHOIS failed for", domain);
               }
             }
 
