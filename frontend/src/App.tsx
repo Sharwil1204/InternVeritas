@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router';
 import { AuthProvider } from './context/AuthContext';
+import { AnalyzerProvider } from './context/AnalyzerContext';
 import { router } from './routes';
 
 export default function App() {
@@ -15,7 +16,9 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <AnalyzerProvider>
+        <RouterProvider router={router} />
+      </AnalyzerProvider>
     </AuthProvider>
   );
 }
