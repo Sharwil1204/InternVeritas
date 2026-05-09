@@ -228,8 +228,10 @@ export const AnalyzerPage = () => {
   const handleAnalyze = async () => {
     try {
       // Guest scan limit check
-      if (!user) {
+      console.log('Current user status:', user);
+      if (!user || !user.email) {
         const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+        console.log('Guest scan count check:', scanCount);
         if (scanCount >= 2) {
           setScanLimitMessage("You've used your 2 free scans! Create a free account to continue analyzing internship offers without limits.");
           setAuthMode('signup');
@@ -263,9 +265,10 @@ export const AnalyzerPage = () => {
       setIsLoading(false);
 
       // Increment scan count for guests
-      if (!user) {
+      if (!user || !user.email) {
         const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
         localStorage.setItem('internveritas_scan_count', (scanCount + 1).toString());
+        console.log('Incremented scan count to:', scanCount + 1);
       }
 
       navigate("/results", {

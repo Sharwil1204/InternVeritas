@@ -11,7 +11,7 @@ import {
   Download,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { motion } from 'motion/react';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Navbar } from '../components/Navbar';
@@ -214,109 +214,120 @@ export const ResultsPage = () => {
   };
 
   const handleDownloadReport = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const date = new Date().toLocaleDateString();
+    console.log('Download button clicked');
+    alert('Report generation started. Please wait...');
+    
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const date = new Date().toLocaleDateString();
 
-    // --- Header ---
-    doc.setFillColor(10, 15, 30); // Dark theme color
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('InternVeritas', 20, 25);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Internship Trust Analysis Report', 20, 32);
-    doc.text(`Generated on: ${date}`, pageWidth - 20, 32, { align: 'right' });
-
-    // --- Main Score ---
-    doc.setTextColor(30, 30, 30);
-    doc.setFontSize(18);
-    doc.text('Analysis Summary', 20, 55);
-    
-    // Score Box
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(245, 245, 250);
-    doc.roundedRect(20, 62, pageWidth - 40, 30, 3, 3, 'FD');
-    
-    doc.setFontSize(12);
-    doc.text('Overall Risk Score:', 30, 75);
-    
-    const scoreColor = score < 30 ? [16, 185, 129] : score < 60 ? [234, 179, 8] : score < 80 ? [249, 115, 22] : [239, 68, 68];
-    doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-    doc.setFontSize(24);
-    doc.text(`${score}%`, 75, 76);
-    
-    doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-    doc.setFontSize(14);
-    doc.text(riskLevel.level, pageWidth - 30, 75, { align: 'right' });
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(riskLevel.message, pageWidth - 30, 82, { align: 'right' });
-
-    // --- Factor Breakdown Table ---
-    doc.setTextColor(30, 30, 30);
-    doc.setFontSize(14);
-    doc.text('Risk Factor Breakdown', 20, 105);
-    
-    const tableData = riskFactors.map(f => [
-      f.name,
-      `${f.score}%`,
-      f.level.toUpperCase().replace('-', ' ')
-    ]);
-
-    (doc as any).autoTable({
-      startY: 110,
-      head: [['Factor', 'Risk Score', 'Risk Level']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [99, 102, 241] },
-      margin: { left: 20, right: 20 }
-    });
-
-    const finalY = (doc as any).lastAutoTable.finalY || 150;
-
-    // --- AI Explanation ---
-    doc.setFontSize(14);
-    doc.text('Detailed Observations', 20, finalY + 15);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(60, 60, 60);
-    
-    const explanationText = backendResult?.explanation || 
-      `The internship posting shows ${score >= 80 ? 'multiple red flags' : score >= 60 ? 'several warning signs' : 'some concerns'}. We evaluated factors including advertisement language, email authenticity, and company legitimacy.`;
-    
-    const splitExplanation = doc.splitTextToSize(explanationText, pageWidth - 40);
-    doc.text(splitExplanation, 20, finalY + 22);
-
-    // --- Suspicious Indicators ---
-    if (suspiciousIndicators.length > 0) {
-      const indicatorsY = finalY + 22 + (splitExplanation.length * 5) + 10;
-      doc.setFontSize(14);
-      doc.setTextColor(30, 30, 30);
-      doc.text('Key Warning Signs', 20, indicatorsY);
+      // --- Header ---
+      doc.setFillColor(10, 15, 30); // Dark theme color
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('InternVeritas', 20, 25);
       
       doc.setFontSize(10);
-      doc.setTextColor(239, 68, 68); // Red for warnings
-      suspiciousIndicators.forEach((indicator, index) => {
-        doc.text(`• ${indicator}`, 25, indicatorsY + 8 + (index * 6));
+      doc.setFont('helvetica', 'normal');
+      doc.text('Internship Trust Analysis Report', 20, 32);
+      doc.text(`Generated on: ${date}`, pageWidth - 20, 32, { align: 'right' });
+
+      // --- Main Score ---
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(18);
+      doc.text('Analysis Summary', 20, 55);
+      
+      // Score Box
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(245, 245, 250);
+      doc.roundedRect(20, 62, pageWidth - 40, 30, 3, 3, 'FD');
+      
+      doc.setFontSize(12);
+      doc.text('Overall Risk Score:', 30, 75);
+      
+      const scoreColor = score < 30 ? [16, 185, 129] : score < 60 ? [234, 179, 8] : score < 80 ? [249, 115, 22] : [239, 68, 68];
+      doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
+      doc.setFontSize(24);
+      doc.text(`${score}%`, 75, 76);
+      
+      doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
+      doc.setFontSize(14);
+      doc.text(riskLevel.level, pageWidth - 30, 75, { align: 'right' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(riskLevel.message, pageWidth - 30, 82, { align: 'right' });
+
+      // --- Factor Breakdown Table ---
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(14);
+      doc.text('Risk Factor Breakdown', 20, 105);
+      
+      const tableData = riskFactors.map(f => [
+        f.name,
+        `${f.score}%`,
+        f.level.toUpperCase().replace('-', ' ')
+      ]);
+
+      autoTable(doc, {
+        startY: 110,
+        head: [['Factor', 'Risk Score', 'Risk Level']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [99, 102, 241] },
+        margin: { left: 20, right: 20 }
       });
+
+      const finalY = (doc as any).lastAutoTable?.finalY || 150;
+
+      // --- AI Explanation ---
+      doc.setFontSize(14);
+      doc.setTextColor(30, 30, 30);
+      doc.text('Detailed Observations', 20, finalY + 15);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+      
+      const explanationText = backendResult?.explanation || 
+        `The internship posting shows ${score >= 80 ? 'multiple red flags' : score >= 60 ? 'several warning signs' : 'some concerns'}. We evaluated factors including advertisement language, email authenticity, and company legitimacy.`;
+      
+      const splitExplanation = doc.splitTextToSize(explanationText, pageWidth - 40);
+      doc.text(splitExplanation, 20, finalY + 22);
+
+      // --- Suspicious Indicators ---
+      if (suspiciousIndicators.length > 0) {
+        const indicatorsY = finalY + 22 + (splitExplanation.length * 5) + 10;
+        doc.setFontSize(14);
+        doc.setTextColor(30, 30, 30);
+        doc.text('Key Warning Signs', 20, indicatorsY);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(239, 68, 68); // Red for warnings
+        suspiciousIndicators.forEach((indicator, index) => {
+          doc.text(`• ${indicator}`, 25, indicatorsY + 8 + (index * 6));
+        });
+      }
+
+      // --- Footer ---
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      const footerText = 'Disclaimer: This report is generated by InternVeritas AI for educational purposes only. We provide risk assessments based on available data, but we do not guarantee absolute accuracy. Please perform your own due diligence before accepting any internship.';
+      const splitFooter = doc.splitTextToSize(footerText, pageWidth - 40);
+      doc.text(splitFooter, pageWidth / 2, 285, { align: 'center' });
+
+      // Save PDF
+      doc.save(`InternVeritas_Report_${formData.companyName || 'Analysis'}.pdf`);
+      console.log('Report saved successfully');
+      alert('Report downloaded successfully!');
+    } catch (err) {
+      console.error('PDF Generation Error:', err);
+      alert('Error generating report. Please try again.');
     }
-
-    // --- Footer ---
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    const footerText = 'Disclaimer: This report is generated by InternVeritas AI for educational purposes only. We provide risk assessments based on available data, but we do not guarantee absolute accuracy. Please perform your own due diligence before accepting any internship.';
-    const splitFooter = doc.splitTextToSize(footerText, pageWidth - 40);
-    doc.text(splitFooter, pageWidth / 2, 285, { align: 'center' });
-
-    // Save PDF
-    doc.save(`InternVeritas_Report_${formData.companyName || 'Analysis'}.pdf`);
   };
 
   useEffect(() => {
