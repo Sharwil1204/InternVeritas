@@ -89,6 +89,95 @@ app.post("/extract-company", upload.single("file"), async (req, res) => {
   }
 });
 
+app.get("/search-company", async (req, res) => {
+  const companyName = req.query.name;
+  if (!companyName) {
+    return res.status(400).json({ error: "Company name is required" });
+  }
+
+  try {
+    // 1. Use Serper to find the website
+    let websiteUrl = "";
+    let description = "";
+    const serperKey = process.env.SERPER_API_KEY;
+    
+    if (serperKey) {
+      const serperRes = await axios.post(
+        "https://google.serper.dev/search",
+        { q: `${companyName} official website`, num: 1 },
+        { headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" } }
+      );
+      
+      if (serperRes.data.organic && serperRes.data.organic.length > 0) {
+        websiteUrl = serperRes.data.organic[0].link;
+        description = serperRes.data.organic[0].snippet || "";
+      }
+    }
+
+    if (!websiteUrl) {
+      return res.json({ companies: [] });
+    }
+
+    // 2. Extract domain
+    let domain = "";
+    try {
+      const urlObj = new URL(websiteUrl);
+      domain = urlObj.hostname.replace("www.", "");
+    } catch (e) {
+      domain = websiteUrl.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0];
+    }
+
+    // 3. WHOIS lookup for domain age
+    let domainAge = "Unknown";
+    try {
+      const whoisData = await new Promise((resolve, reject) => {
+        whois.lookup(domain, (err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      });
+
+      const creationDateMatch = whoisData.match(/Creation Date:\s*(.+)/i) || 
+                                whoisData.match(/Created on:\s*(.+)/i) ||
+                                whoisData.match(/Registered on:\s*(.+)/i);
+      
+      if (creationDateMatch && creationDateMatch[1]) {
+        const creationDate = new Date(creationDateMatch[1].trim());
+        if (!isNaN(creationDate)) {
+          const ageInMs = Date.now() - creationDate.getTime();
+          const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
+          
+          if (ageInYears < 1) {
+            const ageInMonths = Math.max(1, Math.floor(ageInYears * 12));
+            domainAge = `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''} old`;
+          } else {
+            const years = Math.floor(ageInYears);
+            domainAge = `${years} year${years !== 1 ? 's' : ''} old`;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("WHOIS Error:", e);
+    }
+
+    res.json({
+      companies: [
+        {
+          title: companyName,
+          url: websiteUrl,
+          description: description,
+          domainAge: domainAge,
+          isLive: true
+        }
+      ]
+    });
+
+  } catch (error) {
+    console.error("Search company error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 async function extractTextFromScannedPDF(filePath) {
   console.log("ocr for scanned PDFs disabled temporarily due to linux deployment constraints.");
   return "SCANNED_PDF_SUPPORT_CURRENTLY_LOCKED";
