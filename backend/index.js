@@ -131,36 +131,52 @@ app.get("/search-company", async (req, res) => {
 
           let domainAge = "Unknown";
           try {
-            const whoisData = await new Promise((resolve, reject) => {
-              whois.lookup(domain, (err, data) => {
-                if (err) reject(err);
-                else resolve(data);
-              });
-            });
+            // First try RDAP (JSON WHOIS) which is faster and more reliable
+            const rdapRes = await axios.get(`https://rdap.org/domain/${domain}`, { timeout: 3000 });
+            let creationDateStr = null;
+            if (rdapRes.data && rdapRes.data.events) {
+              const regEvent = rdapRes.data.events.find(e => e.eventAction === 'registration');
+              if (regEvent && regEvent.eventDate) {
+                creationDateStr = regEvent.eventDate;
+              }
+            }
 
-            if (whoisData) {
-              const creationDateMatch = whoisData.match(/Creation Date:\s*(.+)/i) || 
-                                        whoisData.match(/Created on:\s*(.+)/i) ||
-                                        whoisData.match(/Registered on:\s*(.+)/i);
-              
-              if (creationDateMatch && creationDateMatch[1]) {
-                const creationDate = new Date(creationDateMatch[1].trim());
-                if (!isNaN(creationDate)) {
-                  const ageInMs = Date.now() - creationDate.getTime();
-                  const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
-                  
-                  if (ageInYears < 1) {
-                    const ageInMonths = Math.max(1, Math.floor(ageInYears * 12));
-                    domainAge = `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''} old`;
-                  } else {
-                    const years = Math.floor(ageInYears);
-                    domainAge = `${years} year${years !== 1 ? 's' : ''} old`;
-                  }
+            // Fallback to raw WHOIS if RDAP fails
+            if (!creationDateStr) {
+              const whoisData = await new Promise((resolve, reject) => {
+                whois.lookup(domain, (err, data) => {
+                  if (err) reject(err);
+                  else resolve(data);
+                });
+              });
+
+              if (whoisData) {
+                const creationDateMatch = whoisData.match(/Creation Date:\s*(.+)/i) || 
+                                          whoisData.match(/Created on:\s*(.+)/i) ||
+                                          whoisData.match(/Registered on:\s*(.+)/i);
+                if (creationDateMatch && creationDateMatch[1]) {
+                  creationDateStr = creationDateMatch[1].trim();
+                }
+              }
+            }
+
+            if (creationDateStr) {
+              const creationDate = new Date(creationDateStr);
+              if (!isNaN(creationDate)) {
+                const ageInMs = Date.now() - creationDate.getTime();
+                const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
+                
+                if (ageInYears < 1) {
+                  const ageInMonths = Math.max(1, Math.floor(ageInYears * 12));
+                  domainAge = `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''} old`;
+                } else {
+                  const years = Math.floor(ageInYears);
+                  domainAge = `${years} year${years !== 1 ? 's' : ''} old`;
                 }
               }
             }
           } catch (e) {
-            console.error("WHOIS Error for", domain);
+            console.error("Domain age fetch error for", domain);
           }
 
           companiesList.push({
