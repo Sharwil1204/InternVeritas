@@ -27,7 +27,7 @@ interface CompanyVerificationData {
   skipped: boolean;
 }
 
-interface FormData {
+interface AnalysisFormData {
   companyName: string;
   advertisement: string;
   advertisementFile: File | null;
@@ -58,7 +58,7 @@ export const AnalyzerPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<AnalysisFormData>({
     companyName: '',
     advertisement: '',
     advertisementFile: null,
@@ -226,14 +226,13 @@ export const AnalyzerPage = () => {
   };
 
   const handleAnalyze = async () => {
+    console.log('handleAnalyze started');
     try {
       // Guest scan limit check
-      console.log('Current user status:', user);
       if (!user || !user.email) {
         const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
-        console.log('Guest scan count check:', scanCount);
         if (scanCount >= 2) {
-          setScanLimitMessage("You've used your 2 free scans! Create a free account to continue analyzing internship offers without limits.");
+          setScanLimitMessage('You\'ve used your 2 free scans. Create an account for unlimited analysis!');
           setAuthMode('signup');
           setIsAuthModalOpen(true);
           return;
@@ -242,7 +241,7 @@ export const AnalyzerPage = () => {
 
       setIsLoading(true);
 
-      const form = new FormData();
+      const form = new window.FormData();
 
       if (formData.advertisementFile) {
         form.append("file", formData.advertisementFile);
@@ -278,9 +277,10 @@ export const AnalyzerPage = () => {
         }
       });
 
-    } catch (err) {
+    } catch (err: any) {
       setIsLoading(false);
-      alert("Backend error");
+      console.error("Analysis failed:", err);
+      alert("Analysis failed: " + (err.message || "Unknown error"));
     }
   };
   const handleCompanyVerificationComplete = (verification: CompanyVerificationData) => {
@@ -304,7 +304,6 @@ export const AnalyzerPage = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </button>
-
           <AnimatePresence mode="wait">
             {/* Step 1: Advertisement + Company Name */}
             {currentStep === 1 && (
@@ -699,7 +698,7 @@ export const AnalyzerPage = () => {
                     <button
                       onClick={handleAnalyze}
                       disabled={!canProceed()}
-                      className="flex-1 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex-1 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Analyze Now
                       <ArrowLeft className="h-4 w-4 rotate-180" />

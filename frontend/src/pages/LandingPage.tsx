@@ -18,6 +18,7 @@ import { Navbar } from '../components/Navbar';
 import { AuthModal } from '../components/AuthModal';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Footer } from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 
 const TypewriterText = ({ texts }: { texts: string[] }) => {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -86,6 +87,21 @@ const FadeInSection = ({ children }: { children: React.ReactNode }) => {
 
 export const LandingPage = () => {
   const navigate = useNavigate();
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
+
+  const handleAnalyzeClick = () => {
+    // Check if guest has exhausted free scans
+    if (!user || !user.email) {
+      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+      if (scanCount >= 2) {
+        setScanLimitMessage('You\'ve used your 2 free scans! Create an account to continue analyzing internship offers.');
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+        return;
+      }
+    }
+    navigate('/analyze');
+  };
 
   const features = [
     { icon: FileSearch, title: 'Advertisement Analysis', description: 'AI analyzes job postings for red flags and suspicious patterns' },
@@ -123,7 +139,7 @@ export const LandingPage = () => {
                 <TypewriterText texts={['Detect scams before you apply', 'Protect your career journey', 'Stay safe with AI analysis']} />
               </div>
               <button
-                onClick={() => navigate('/analyze')}
+                onClick={handleAnalyzeClick}
                 className="px-8 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-violet-600/30 text-base inline-flex items-center gap-2"
               >
                 Analyze Now

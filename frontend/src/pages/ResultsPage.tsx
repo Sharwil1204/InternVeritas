@@ -215,7 +215,6 @@ export const ResultsPage = () => {
 
   const handleDownloadReport = () => {
     console.log('Download button clicked');
-    alert('Report generation started. Please wait...');
     
     try {
       const doc = new jsPDF();
@@ -323,7 +322,6 @@ export const ResultsPage = () => {
       // Save PDF
       doc.save(`InternVeritas_Report_${formData.companyName || 'Analysis'}.pdf`);
       console.log('Report saved successfully');
-      alert('Report downloaded successfully!');
     } catch (err) {
       console.error('PDF Generation Error:', err);
       alert('Error generating report. Please try again.');

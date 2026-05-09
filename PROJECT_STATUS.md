@@ -19,13 +19,13 @@ We have successfully transitioned InternVeritas into a **Freemium Platform** and
 ## 🛠️ Pending Work (Detailed)
 
 ### 1. Stabilization & Cleanup (Priority: High)
-- [ ] **Remove Debug Artifacts**: Remove `window.alert` messages from `AnalyzerPage.tsx` and `ResultsPage.tsx`.
-- [ ] **Restore Button UI**: Rename "Analyze Now (DEBUG)" back to "Analyze Now" and re-enable the `disabled` state check (`canProceed`).
+- [x] **Remove Debug Artifacts**: Remove `window.alert` messages from `AnalyzerPage.tsx` and `ResultsPage.tsx`.
+- [x] **Restore Button UI**: Rename "Analyze Now (DEBUG)" back to "Analyze Now" and re-enable the `disabled` state check (`canProceed`).
 - [ ] **Verify PDF Layout**: Ensure the generated PDF report looks professional on all browsers without any library import issues.
 
 ### 2. Freemium Guardrail Finalization
-- [ ] **Re-enable Scan Limit**: Remove the debugging bypass in `AnalyzerPage.tsx` so guests are actually blocked after 2 scans.
-- [ ] **Robust Guest Detection**: Finalize the `!user || !user.email` check to ensure logged-in users never get blocked.
+- [x] **Re-enable Scan Limit**: Remove the debugging bypass in `AnalyzerPage.tsx` so guests are actually blocked after 2 scans.
+- [x] **Robust Guest Detection**: Finalize the `!user || !user.email` check to ensure logged-in users never get blocked.
 
 ### 3. Backend & Data Persistence
 - [ ] **Supabase Scan History**: Sync the local scan history to Supabase for logged-in users so they can see their previous reports.
