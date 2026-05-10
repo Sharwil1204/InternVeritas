@@ -30,14 +30,13 @@ export const ResultsPage = () => {
   const navigate = useNavigate();
   const formData = location.state?.formData;
   const backendResult = location.state?.backendResult;
-  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage, scanCount } = useAuth();
   const [riskScore, setRiskScore] = useState(0);
   const [feedback, setFeedback] = useState('');
 
   const handleScanAgain = () => {
     // Check scan limit for guests
     if (!user || !user.email) {
-      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
       if (scanCount >= 2) {
         setScanLimitMessage("You've used your 2 free scans! Create an account to continue analyzing internship offers.");
         setAuthMode('signup');

@@ -49,7 +49,7 @@ interface AnalysisFormData {
 
 export const AnalyzerPage = () => {
   const navigate = useNavigate();
-  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage, scanCount, incrementScanCount } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [showMismatchModal, setShowMismatchModal] = useState(false);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
@@ -63,7 +63,6 @@ export const AnalyzerPage = () => {
   useEffect(() => {
     // Check scan limit for guests on mount
     if (!user || !user.email) {
-      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
       if (scanCount >= 2) {
         setGuestLimitReached(true);
         setScanLimitMessage("You've used your 2 free scans! Create an account to continue analyzing internship offers.");
@@ -75,7 +74,7 @@ export const AnalyzerPage = () => {
     } else {
       setGuestLimitReached(false);
     }
-  }, [user, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
+  }, [user, scanCount, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
 
   const [formData, setFormData] = useState<AnalysisFormData>({
     companyName: '',
@@ -249,7 +248,6 @@ export const AnalyzerPage = () => {
     try {
       // Guest scan limit check
       if (!user || !user.email) {
-        const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
         if (scanCount >= 2) {
           setScanLimitMessage('You\'ve used your 2 free scans. Create an account for unlimited analysis!');
           setAuthMode('signup');
@@ -285,8 +283,7 @@ export const AnalyzerPage = () => {
       // Handle storage and limits
       if (!user || !user.email) {
         // 1. Increment scan count for limits
-        const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
-        localStorage.setItem('internveritas_scan_count', (scanCount + 1).toString());
+        incrementScanCount();
         
         // 2. Save analysis to local history for future sync
         const localAnalyses = JSON.parse(localStorage.getItem('internveritas_analyses') || '[]');

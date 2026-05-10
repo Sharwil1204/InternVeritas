@@ -86,12 +86,11 @@ const FadeInSection = ({ children }: { children: React.ReactNode }) => {
 
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage } = useAuth();
+  const { user, setIsAuthModalOpen, setAuthMode, setScanLimitMessage, scanCount } = useAuth();
 
   const handleAnalyzeClick = () => {
     // Check if guest has exhausted free scans
     if (!user || !user.email) {
-      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
       if (scanCount >= 2) {
         setScanLimitMessage('You\'ve used your 2 free scans! Create an account to continue analyzing internship offers.');
         setAuthMode('signup');
@@ -105,14 +104,13 @@ export const LandingPage = () => {
   useEffect(() => {
     // Proactively check scan limit on mount
     if (!user || !user.email) {
-      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
       if (scanCount >= 2) {
         setScanLimitMessage('You\'ve used your 2 free scans! Create an account to continue analyzing internship offers.');
         setAuthMode('signup');
         setIsAuthModalOpen(true);
       }
     }
-  }, [user, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
+  }, [user, scanCount, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
 
   const features = [
     { icon: FileSearch, title: 'Advertisement Analysis', description: 'AI analyzes job postings for red flags and suspicious patterns' },

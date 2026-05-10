@@ -16,6 +16,8 @@ interface AuthContextType {
   setAuthMode: (mode: 'login' | 'signup') => void;
   scanLimitMessage: string;
   setScanLimitMessage: (message: string) => void;
+  scanCount: number;
+  incrementScanCount: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [scanLimitMessage, setScanLimitMessage] = useState('');
+  const [scanCount, setScanCount] = useState(0);
 
   useEffect(() => {
     // Check localStorage for existing user
@@ -32,7 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    
+    // Initial scan count load
+    const count = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+    setScanCount(count);
   }, []);
+
+  const incrementScanCount = () => {
+    const newCount = scanCount + 1;
+    setScanCount(newCount);
+    localStorage.setItem('internveritas_scan_count', newCount.toString());
+  };
 
   const login = async (email: string, _password: string): Promise<boolean> => {
     // Check if this user signed up before (has stored name)
@@ -44,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Reset scan count on login
     localStorage.removeItem('internveritas_scan_count');
+    setScanCount(0);
     return true;
   };
 
@@ -58,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Reset scan count on signup
     localStorage.removeItem('internveritas_scan_count');
+    setScanCount(0);
     return true;
   };
 
@@ -79,6 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthMode,
         scanLimitMessage,
         setScanLimitMessage,
+        scanCount,
+        incrementScanCount,
       }}
     >
       {children}
