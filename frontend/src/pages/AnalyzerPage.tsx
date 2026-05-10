@@ -57,6 +57,7 @@ export const AnalyzerPage = () => {
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [guestLimitReached, setGuestLimitReached] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -64,13 +65,17 @@ export const AnalyzerPage = () => {
     if (!user || !user.email) {
       const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
       if (scanCount >= 2) {
+        setGuestLimitReached(true);
         setScanLimitMessage("You've used your 2 free scans! Create an account to continue analyzing internship offers.");
         setAuthMode('signup');
         setIsAuthModalOpen(true);
-        navigate('/');
+      } else {
+        setGuestLimitReached(false);
       }
+    } else {
+      setGuestLimitReached(false);
     }
-  }, [user, navigate, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
+  }, [user, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
 
   const [formData, setFormData] = useState<AnalysisFormData>({
     companyName: '',
@@ -359,7 +364,42 @@ export const AnalyzerPage = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </button>
-          <AnimatePresence mode="wait">
+
+          {guestLimitReached ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20 px-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+            >
+              <Shield className="h-16 w-16 text-violet-400 mx-auto mb-6" />
+              <h2 className="text-3xl font-bold mb-4 text-white font-outfit">Scan Limit Reached</h2>
+              <p className="text-white/70 mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                You've completed your 2 free internship scans. Please create an account to unlock unlimited analysis and track your history.
+              </p>
+              <button
+                onClick={() => {
+                  setAuthMode('signup');
+                  setIsAuthModalOpen(true);
+                }}
+                className="px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-all shadow-lg shadow-violet-600/30 text-lg font-semibold"
+              >
+                Create Account
+              </button>
+              <div className="mt-8 text-white/40 text-sm">
+                Already have an account? {' '}
+                <button 
+                  onClick={() => {
+                    setAuthMode('login');
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="text-violet-400 hover:text-violet-300 font-medium underline-offset-4 hover:underline"
+                >
+                  Log In
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <AnimatePresence mode="wait">
             {/* Step 1: Advertisement + Company Name */}
             {currentStep === 1 && (
               <motion.div
@@ -764,6 +804,31 @@ export const AnalyzerPage = () => {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Guest Limit Modal */}
+        {guestLimitReached && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-[#0a0f1e] border border-white/10 rounded-2xl p-6 w-full max-w-md text-center"
+            >
+              <div className="w-16 h-16 bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="h-8 w-8 text-violet-400" />
+              </div>
+              <h3 className="text-2xl text-white mb-2">Limit Reached</h3>
+              <p className="text-white/70 mb-6">
+                You have reached your limit of free analyses. Please sign up to continue verifying more opportunities.
+              </p>
+              <button
+                onClick={() => window.location.href = '/auth/signup'}
+                className="w-full px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors"
+              >
+                Create Account
+              </button>
+            </motion.div>
+          </div>
+        )}
 
         {/* Mismatch Modal */}
         {showMismatchModal && (

@@ -5,11 +5,13 @@ import { ResultsPage } from "./pages/ResultsPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { TermsConditionsPage } from "./pages/TermsConditionsPage";
+import { AuthModal } from "./components/AuthModal";
 
 const RootLayer = () => (
   <>
     <ScrollRestoration />
     <Outlet />
+    <AuthModal />
   </>
 );
 

@@ -3,7 +3,6 @@ import { RouterProvider } from 'react-router';
 import { AuthProvider } from './context/AuthContext';
 import { AnalyzerProvider } from './context/AnalyzerContext';
 import { CookieConsent } from './components/CookieConsent';
-import { AuthModal } from './components/AuthModal';
 import { router } from './routes';
 
 export default function App() {
@@ -20,7 +19,6 @@ export default function App() {
     <AuthProvider>
       <AnalyzerProvider>
         <RouterProvider router={router} />
-        <AuthModal />
         <CookieConsent />
       </AnalyzerProvider>
     </AuthProvider>
