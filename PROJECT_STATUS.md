@@ -29,6 +29,7 @@ We have successfully transitioned InternVeritas into a **Freemium Platform** and
 
 ### 3. Backend & Data Persistence
 - [x] **Supabase Scan History**: Sync the local scan history to Supabase for logged-in users so they can see their previous reports.
+- [x] **Sync Logic**: Implemented auto-sync from localStorage to Supabase when a user logs in and visits the History page.
 - [/] **Persistent Counter**: Move the guest scan counter to a more secure server-side or encrypted client-side storage to prevent easy resets.
 
 ### 4. Advanced AI Analysis

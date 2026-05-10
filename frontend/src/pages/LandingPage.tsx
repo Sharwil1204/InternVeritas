@@ -15,10 +15,9 @@ import {
 } from 'lucide-react';
 import { motion, useInView } from 'motion/react';
 import { Navbar } from '../components/Navbar';
-import { AuthModal } from '../components/AuthModal';
+import { useAuth } from '../context/AuthContext';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Footer } from '../components/Footer';
-import { useAuth } from '../context/AuthContext';
 
 const TypewriterText = ({ texts }: { texts: string[] }) => {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -103,6 +102,18 @@ export const LandingPage = () => {
     navigate('/analyze');
   };
 
+  useEffect(() => {
+    // Proactively check scan limit on mount
+    if (!user || !user.email) {
+      const scanCount = parseInt(localStorage.getItem('internveritas_scan_count') || '0');
+      if (scanCount >= 2) {
+        setScanLimitMessage('You\'ve used your 2 free scans! Create an account to continue analyzing internship offers.');
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+      }
+    }
+  }, [user, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
+
   const features = [
     { icon: FileSearch, title: 'Advertisement Analysis', description: 'AI analyzes job postings for red flags and suspicious patterns' },
     { icon: Mail, title: 'Email Verification', description: 'Validates official company email domains and authenticity' },
@@ -125,7 +136,6 @@ export const LandingPage = () => {
       <ParticlesBackground />
       <div className="relative z-10">
         <Navbar />
-        <AuthModal />
 
         {/* Hero Section */}
         <section className="relative min-h-[90vh] flex items-center">
