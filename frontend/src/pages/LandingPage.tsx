@@ -101,16 +101,7 @@ export const LandingPage = () => {
     navigate('/analyze');
   };
 
-  useEffect(() => {
-    // Proactively check scan limit on mount
-    if (!user || !user.email) {
-      if (scanCount >= 2) {
-        setScanLimitMessage('You\'ve used your 2 free scans! Create an account to continue analyzing internship offers.');
-        setAuthMode('signup');
-        setIsAuthModalOpen(true);
-      }
-    }
-  }, [user, scanCount, setScanLimitMessage, setAuthMode, setIsAuthModalOpen]);
+  // Scan limit is now only checked when clicking 'Analyze Now' to avoid being too aggressive on entry
 
   const features = [
     { icon: FileSearch, title: 'Advertisement Analysis', description: 'AI analyzes job postings for red flags and suspicious patterns' },
@@ -148,12 +139,22 @@ export const LandingPage = () => {
               </div>
               <button
                 onClick={handleAnalyzeClick}
-                className="px-8 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-violet-600/30 text-base inline-flex items-center gap-2"
+                className={`px-8 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg text-base inline-flex items-center gap-2 ${
+                  (!user || !user.email) && scanCount >= 2
+                    ? 'bg-white/10 text-white/50 border border-white/10 cursor-not-allowed hover:scale-100'
+                    : 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-600/30'
+                }`}
               >
-                Analyze Now
+                {!user && scanCount >= 2 ? 'Scan Limit Reached' : 'Analyze Now'}
                 <ArrowRight className="h-5 w-5" />
               </button>
-              <p className="text-white/50 text-sm mt-4">✨ 2 free scans — no account required</p>
+              {!user && (
+                <p className="text-white/50 text-sm mt-4">
+                  {scanCount >= 2 
+                    ? 'Sign up to unlock unlimited scans' 
+                    : '✨ 2 free scans — no account required'}
+                </p>
+              )}
               <div className="flex flex-wrap gap-4 mt-8">
                 {[
                   { icon: Brain, text: 'AI-Powered Analysis' },

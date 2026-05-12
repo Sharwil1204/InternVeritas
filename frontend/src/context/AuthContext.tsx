@@ -42,9 +42,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const incrementScanCount = () => {
-    const newCount = scanCount + 1;
-    setScanCount(newCount);
-    localStorage.setItem('internveritas_scan_count', newCount.toString());
+    setScanCount((prev) => {
+      const newCount = prev + 1;
+      localStorage.setItem('internveritas_scan_count', newCount.toString());
+      return newCount;
+    });
   };
 
   const login = async (email: string, _password: string): Promise<boolean> => {

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Clock, Building2, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
+import { Clock, Building2, AlertTriangle, CheckCircle, FileText, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Navbar } from '../components/Navbar';
 import { ParticlesBackground } from '../components/ParticlesBackground';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { downloadReport } from '../lib/reportDownloader';
 
 interface Analysis {
   id: string;
@@ -164,6 +165,22 @@ export const HistoryPage = () => {
     });
   };
 
+  const handleDownload = (analysis: Analysis) => {
+    const score = calculateRiskScore(analysis);
+    const riskLevel = getRiskLevel(score);
+    
+    // Add default messages for report downloader
+    const riskLevelWithMsg = {
+      ...riskLevel,
+      message: score < 30 ? 'Offer looks genuine' : 
+               score < 60 ? 'Verify before applying' : 
+               score < 80 ? 'Strong red flags detected' : 
+               'Avoid — Scam chances high'
+    };
+
+    downloadReport(analysis, analysis.backend_result, score, riskLevelWithMsg);
+  };
+
   if (!user) return null;
 
   return (
@@ -259,16 +276,29 @@ export const HistoryPage = () => {
                             </div>
                           </div>
 
-                          {/* View Button */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewReport(analysis);
-                            }}
-                            className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm whitespace-nowrap"
-                          >
-                            View Full Report
-                          </button>
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(analysis);
+                              }}
+                              className="px-4 py-2 bg-white/5 border border-white/20 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2 hover:bg-white/10"
+                              title="Download PDF Report"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span className="sm:hidden lg:inline">Download</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewReport(analysis);
+                              }}
+                              className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm whitespace-nowrap"
+                            >
+                              View Report
+                            </button>
+                          </div>
                         </div>
                       </div>
 

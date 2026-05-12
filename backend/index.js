@@ -228,33 +228,59 @@ async function extractTextFromScannedPDF(filePath) {
 }
 
 function analyzeScam(text) {
-  let score = 0;
+  let totalScore = 0;
   let reasons = [];
-  if (text.toLowerCase().includes("registration fee")) {
-    score += 30; reasons.push("Asking for registration fee");
-  }
-  if (text.toLowerCase().includes("limited seats") || text.toLowerCase().includes("limited spots")) {
-    score += 10; reasons.push("Urgency tactic used");
-  }
-  if (text.toLowerCase().includes("guaranteed")) {
-    score += 20; reasons.push("Unrealistic guarantee");
-  }
-  if (text.toLowerCase().includes("no interview")) {
-    score += 15; reasons.push("No interview process");
-  }
-  if (text.toLowerCase().includes("pay") || text.toLowerCase().includes("fees")) {
-    score += 20; reasons.push("Payment mentioned");
-  }
-  if (text.toLowerCase().includes("whatsapp only")) {
-    score += 15; reasons.push("WhatsApp only contact");
-  }
-  if (text.toLowerCase().includes("urgent") || text.toLowerCase().includes("limited time") || text.toLowerCase().includes("hurry")) {
-    score += 10; reasons.push("Urgency pressure");
-  }
-  score = Math.min(score, 100);
+  const t = text.toLowerCase();
+
+  // Defined Categories with their Weights
+  const riskCategories = [
+    {
+      label: "Payment Request Detected",
+      weight: 45, // Critical indicator
+      phrases: ["registration fee", "refundable deposit", "onboarding amount", "verification payment", "training commitment", "assessment fees", "joining kit", "security deposit", "kit charges", "uniform charges", "id card charges", "registration amount", "refundable security", "pay", "fees"]
+    },
+    {
+      label: "Urgency Pressure Tactics",
+      weight: 15,
+      phrases: ["limited seats", "limited spots", "complete within", "final slot", "immediate joining", "last opportunity", "only seats remaining", "urgent requirement", "joining today", "offer expires", "urgent", "limited time", "hurry"]
+    },
+    {
+      label: "Suspicious Hiring Process",
+      weight: 25,
+      phrases: ["no interview", "direct joining", "no interview required", "instant selection", "automatic approval", "walk-in joining", "same day offer", "guaranteed"]
+    },
+    {
+      label: "Authority Manipulation",
+      weight: 15,
+      phrases: ["selected by hr", "management approved", "officially shortlisted", "directly selected", "ceo approved", "board selected"]
+    },
+    {
+      label: "Sensitive Data Harvesting",
+      weight: 35,
+      phrases: ["aadhaar required", "pan card required", "bank details required", "selfie verification", "document verification before joining"]
+    },
+    {
+      label: "Non-Professional Contact",
+      weight: 15,
+      phrases: ["whatsapp only", "telegram", "dm for details"]
+    }
+  ];
+
+  // Analysis Loop
+  riskCategories.forEach(category => {
+    const matches = category.phrases.filter(phrase => t.includes(phrase));
+    if (matches.length > 0) {
+      totalScore += category.weight;
+      // Adds specific words found to the reason for better transparency in UI
+      reasons.push(`${category.label}: Found "${matches[0]}"${matches.length > 1 ? ` (+${matches.length - 1} more)` : ""}`);
+    }
+  });
+
+  totalScore = Math.min(totalScore, 100);
+
   return {
-    ruleScore: score,
-    ruleLevel: score >= 70 ? "HIGH" : score >= 40 ? "MEDIUM" : "LOW",
+    ruleScore: totalScore,
+    ruleLevel: totalScore >= 75 ? "HIGH" : totalScore >= 40 ? "MEDIUM" : "LOW",
     reasons
   };
 }
@@ -531,6 +557,36 @@ async function analyzeLinkedIn(observations) {
   }
 }
 
+app.post("/report-scam", upload.single("screenshot"), async (req, res) => {
+  try {
+    const { companyName, scamType, description } = req.body;
+    let screenshotUrl = null;
+
+    if (req.file) {
+      // In a real app, you'd upload to Supabase Storage or S3
+      // For now, we'll just acknowledge the file exists
+      console.log("Screenshot received:", req.file.originalname);
+      screenshotUrl = "screenshot_placeholder"; 
+    }
+
+    if (supabase) {
+      const { error } = await supabase.from('scam_reports').insert([{
+        company_name: companyName,
+        scam_type: scamType,
+        description: description,
+        screenshot_url: screenshotUrl,
+        created_at: new Date()
+      }]);
+      if (error) throw error;
+    }
+
+    res.json({ success: true, message: "Report submitted successfully" });
+  } catch (error) {
+    console.error("Report scam error:", error.message);
+    res.status(500).json({ error: "Failed to submit report" });
+  }
+});
+
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("No file uploaded");
@@ -585,6 +641,16 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const finalScore = combineScores(ruleResult.ruleScore, aiResult.finalRiskScore);
     const finalLevel = getFinalLevel(finalScore);
 
+    // ✅ Check for existing scam reports
+    let reportCount = 0;
+    if (supabase) {
+      const { count, error: countError } = await supabase
+        .from('scam_reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('company_name', companyName);
+      if (!countError) reportCount = count;
+    }
+
     res.json({
       text: extractedText,
       companyName: companyName,
@@ -595,7 +661,8 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       ruleFlags: ruleResult.reasons,
       searchResults: searchResults,
       emailAnalysis: emailAnalysis,
-      linkedinAnalysis: linkedinAnalysis
+      linkedinAnalysis: linkedinAnalysis,
+      reportCount: reportCount
     });
 
     // ✅ Log to Internal Database for future training

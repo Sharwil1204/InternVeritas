@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
+  Shield,
   ArrowLeft,
   Upload,
   Mail,
@@ -800,7 +801,8 @@ export const AnalyzerPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        )}
+      </div>
 
         {/* Guest Limit Modal */}
         {guestLimitReached && (
